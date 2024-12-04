@@ -1,10 +1,12 @@
 package app;
 
+import bd.Conection;
+
 public class prueba {
 
 	public static void main(String[] args) {
-		System.out.println("Hola mundo.");
+		Conection conectObject = new Conection();
+		conectObject.establecerConexion();
 	}
 
 }
-
