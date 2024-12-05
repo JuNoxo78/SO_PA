@@ -1,6 +1,11 @@
 package app.frames;
 
 import app.frames.B_Alumno_MisNotas;
+import bd.Conection;
+import bd.UserDetails;
+import static encryption.SOPA.desencriptar;
+import static encryption.SOPA.encriptar;
+import java.util.ArrayList;
 
 public class A_All_Login extends javax.swing.JFrame {
 
@@ -135,28 +140,74 @@ public class A_All_Login extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButtonLoginActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonLoginActionPerformed
-		// TODO add your handling code here:
-		String usuario = JTextUsuario.getText();
-		String contraseña = new String(JTextPassword.getPassword());
+		String usuarioIngresado = JTextUsuario.getText();
+		String passwordIngresada = JTextPassword.getText();
 
-		// Validación básica de credenciales (puedes mejorar esto con una conexión a base de datos)
-		if (usuario.equals("admin") && contraseña.equals("1234")) {
-			// Mostrar la siguiente ventana
-			B_Alumno_MisNotas ventanaAlumnos = new B_Alumno_MisNotas();
-			ventanaAlumnos.setVisible(true);
-			ventanaAlumnos.setLocationRelativeTo(null);
-			this.dispose(); // Cerrar la ventana de Login
-		} else if (usuario.equals("profe") && contraseña.equals("123")) {
-			B_Profesor_MisEvaluaciones ventanaProfesor = new B_Profesor_MisEvaluaciones();
-			ventanaProfesor.setVisible(true);
-			ventanaProfesor.setLocationRelativeTo(null);
-			this.dispose(); // Cerrar la ventana de Login
-		} else {
+		Conection conectObject = new Conection();
+
+		ArrayList<UserDetails> usuarios = conectObject.obtenerDetallesUsuarios();
+		boolean userNotFound = true;
+
+		B_Alumno_MisNotas ventanaAlumno = new B_Alumno_MisNotas();
+		B_Profesor_MisEvaluaciones ventanaProfesor = new B_Profesor_MisEvaluaciones();
+		String decryptPassword;
+		String encryptPassword;
+
+		for (UserDetails usuario : usuarios) {
+
+			if (usuarioIngresado.equals(usuario.getUserName())) {
+				System.out.println(usuario.isEncrypt());
+				if (usuario.isEncrypt()) {
+					decryptPassword = desencriptar(usuario.getContraseña());
+				} else {
+					System.out.println("hola");
+					decryptPassword = usuario.getContraseña();
+				}
+
+				if (passwordIngresada.equals(decryptPassword)) {
+					if (!usuario.isEncrypt()) {
+						encryptPassword = encriptar(usuario.getContraseña());
+						conectObject.cambiarContraseña(usuario.getUserName(), encryptPassword);
+
+					}
+
+					switch (usuario.getNameRol()) {
+						case "Alumno":
+							ventanaAlumno.getJLabelAlumnoName().setText(usuario.getName());
+							ventanaAlumno.setVisible(true);
+							ventanaAlumno.setLocationRelativeTo(null);
+							this.dispose();
+							break;
+						case "Profesor":
+							ventanaProfesor.getjLabelName().setText(usuario.getName());
+							ventanaProfesor.setVisible(true);
+							ventanaProfesor.setLocationRelativeTo(null);
+							this.dispose();
+							break;
+						case "Coordinador":
+							ventanaProfesor.getjLabelName().setText(usuario.getName());
+							ventanaProfesor.getjLabelWelcome().setText("BIENVENIDO COORDINADOR,");
+							ventanaProfesor.setVisible(true);
+							ventanaProfesor.setLocationRelativeTo(null);
+							this.dispose();
+							break;
+						default:
+							throw new AssertionError();
+					}
+					userNotFound = false;
+					break;
+
+				}
+			}
+		}
+
+		if (userNotFound) {
 			javax.swing.JOptionPane.showMessageDialog(this,
 					"Usuario o contraseña incorrectos",
 					"Error de inicio de sesión",
 					javax.swing.JOptionPane.ERROR_MESSAGE);
 		}
+
 
     }//GEN-LAST:event_jButtonLoginActionPerformed
 

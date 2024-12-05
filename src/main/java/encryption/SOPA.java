@@ -2,8 +2,9 @@ package encryption;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Scanner;
 
-public class PruebaAlgoritmo {
+public class SOPA {
 
 	private static final Map<Character, String> charToSoup = new LinkedHashMap<>();
 	private static final Map<String, Character> soupToChar = new LinkedHashMap<>();
@@ -41,20 +42,6 @@ public class PruebaAlgoritmo {
 		}
 	}
 
-	public static void main(String[] args) {
-		String textoOriginal = "siosjdofi Asoijo 23j23$,, s";
-		System.out.println("Texto original: " + textoOriginal);
-
-		// Encriptar
-		String encriptado = encriptar(textoOriginal.trim());
-		System.out.println("Texto encriptado: " + encriptado);
-
-		// Desencriptar
-		System.out.println("\n-------DESENCRIPTACION-------");
-		desencriptar(encriptado);
-		//System.out.println("Texto desencriptado: " + desencriptado);
-	}
-
 	public static String encriptar(String texto) {
 		StringBuilder firstResult = new StringBuilder();
 
@@ -75,8 +62,6 @@ public class PruebaAlgoritmo {
 
 			firstResult.append(sopa);
 		}
-
-		System.out.println("1era fase: " + firstResult);
 
 		// Fase 2: Convertir las sopas a números. Las o de los espacios en blanco a O. Las m de mayúsculas
 		// a M.
@@ -105,8 +90,6 @@ public class PruebaAlgoritmo {
 				secondResult.append(letra);
 			}
 		}
-
-		System.out.println("2da fase: " + secondResult);
 
 		// Fase 3: Aplicar Cifrado César intercalado
 		String[] grupos = secondResult.toString().split("O");
@@ -170,7 +153,7 @@ public class PruebaAlgoritmo {
 		return finalResult.toString();
 	}
 
-	public static void desencriptar(String textoEncriptado) {
+	public static String desencriptar(String textoEncriptado) {
 		String[] grupos = textoEncriptado.split("O");
 		StringBuilder firstDecryptResult = new StringBuilder();
 		int desplazamiento = grupos.length - 1;
@@ -245,8 +228,6 @@ public class PruebaAlgoritmo {
 			}
 		}
 
-		System.out.println("2da fase: " + firstDecryptResult);
-
 		// Fase 2: Convertir los números a abreviaturas de sopas. Las O de los espacios en blanco a o. Las M de mayúsculas
 		// a m
 		StringBuilder secondDecryptResult = new StringBuilder();
@@ -268,7 +249,55 @@ public class PruebaAlgoritmo {
 			}
 		}
 
-		System.out.println("1era fase: " + secondDecryptResult);
+		// Fase Final: Reconstruir sopas a partir de números. Considerar que las mayúsculas están precidas por una "m", y que los espacios son "o"
+		StringBuilder finalDecryptResult = new StringBuilder();
+		toDecrypt = "";
 
+		for (String grupo : secondDecryptResult.toString().split("o")) {
+			int i = 0;
+			String traduccion = "";
+
+			for (char ch : grupo.toCharArray()) {
+				if (ch == 'm') {
+					String sRest = grupo.substring(i + 1, i + 3);
+					char result = soupToChar.get(sRest);
+					result = Character.toUpperCase(result);
+					traduccion += String.valueOf(result);
+				} else {
+					if (i >= 1) {
+						if (grupo.charAt(i - 1) == 'm') {
+							i++;
+							continue;
+						} else if (i >= 2) {
+							if (grupo.charAt(i - 2) == 'm') {
+								i++;
+								continue;
+							}
+						}
+					}
+
+					if (Character.isLetter(ch)) {
+						toDecrypt += String.valueOf(ch);
+
+						if (toDecrypt.length() == 2) {
+							char result = soupToChar.get(toDecrypt);
+							traduccion += String.valueOf(result);
+							toDecrypt = "";
+						}
+
+					} else {
+						traduccion += String.valueOf(ch);
+					}
+
+				}
+
+				i++;
+
+			}
+			finalDecryptResult.append(traduccion);
+			finalDecryptResult.append(" ");
+		}
+
+		return finalDecryptResult.toString().trim();
 	}
 }
