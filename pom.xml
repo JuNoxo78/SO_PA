@@ -8,7 +8,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.release>20</maven.compiler.release>
-		<exec.mainClass>app.prueba</exec.mainClass>
+		<exec.mainClass>app.pruebas</exec.mainClass>
 	</properties>
 	<dependencies>
 		<!-- https://mvnrepository.com/artifact/com.microsoft.sqlserver/mssql-jdbc -->
